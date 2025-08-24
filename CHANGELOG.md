@@ -1,4 +1,4 @@
-# Revision history for servant-router
+# Revision history for miso-servant-router
 
 ## 0.1.0.0 -- YYYY-mm-dd
 
