@@ -1,4 +1,4 @@
-miso-servant-router
+servant-miso-router
 ============================
 
 This package provides a client-side router that can be used with both [servant](https://hackage.haskell.org/packages/servant) and [miso](https://github.com/dmjio/miso) applications.
