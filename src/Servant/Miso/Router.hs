@@ -15,7 +15,7 @@
 -- Stability   :  experimental
 -- Portability :  non-portable
 ----------------------------------------------------------------------------
-module Servant.Router
+module Servant.Miso.Router
   ( -- ** Classes
     HasRouter (..)
     -- ** Types
