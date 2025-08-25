@@ -24,10 +24,12 @@ library
   build-depends:
     base < 5,
     bytestring,
+    containers,
     http-api-data,
     http-types,
     network-uri,
     servant > 0.18 && < 0.21,
+    servant-miso-html,
     text,
     miso >= 1.9 && < 1.10
   hs-source-dirs:

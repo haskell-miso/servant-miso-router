@@ -1,11 +1,12 @@
 -----------------------------------------------------------------------------
-{-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE OverloadedStrings     #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE TypeFamilies          #-}
-{-# LANGUAGE TypeOperators         #-}
-{-# LANGUAGE GADTs                 #-}
-{-# LANGUAGE PolyKinds             #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE FlexibleInstances   #-}
+{-# LANGUAGE RecordWildCards     #-}
+{-# LANGUAGE TypeFamilies        #-}
+{-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE PolyKinds           #-}
+{-# LANGUAGE GADTs               #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Servant.Miso.Router
@@ -23,6 +24,8 @@ module Servant.Miso.Router
   , Router
     -- ** Routing
   , route
+    -- ** Content Type re-export
+  , HTML
   ) where
 -----------------------------------------------------------------------------
 import qualified Data.ByteString.Char8 as BS
@@ -36,8 +39,11 @@ import           Network.HTTP.Types hiding (Header)
 import           Network.URI
 import           Servant.API
 import           Web.HttpApiData
------------------------------------------------------------------------------
-import           Miso (View)
+import           Servant.Miso.Html (HTML)
+import           Miso.Types (View)
+import           Miso.Router ()
+import           Miso.String (fromMisoString)
+import qualified Miso.Router as Miso
 -----------------------------------------------------------------------------
 -- | Router terminator.
 -- The @HasRouter@ instance for @View@ finalizes the router.
@@ -195,7 +201,7 @@ runRoute
   :: HasRouter layout
   => Proxy layout
   -> RouteT layout a
-  -> URI
+  -> Miso.URI
   -> Either RoutingError a
 runRoute layout handler u = runRouteLoc (uriToLocation u) layout handler
 -----------------------------------------------------------------------------
@@ -205,15 +211,25 @@ route
   :: HasRouter layout
   => Proxy layout
   -> RouteT layout (m -> a)
-  -> (m -> URI)
+  -> (m -> Miso.URI)
   -> m
   -> Either RoutingError a
 route layout pages getURI model = ($ model) <$> runRoute layout pages (getURI model)
 -----------------------------------------------------------------------------
 -- | Convert a 'URI' to a 'Location'.
-uriToLocation :: URI -> Location
-uriToLocation uri = Location
+uriToLocation :: Miso.URI -> Location
+uriToLocation misoUri = Location
   { locPath = decodePathSegments $ BS.pack (uriPath uri)
   , locQuery = parseQuery $ BS.pack (uriQuery uri)
+  } where
+      uri = uriToURI misoUri
+-----------------------------------------------------------------------------
+uriToURI :: Miso.URI -> URI
+uriToURI misoUri = URI
+  { uriPath = fromMisoString (Miso.uriPath misoUri)
+  , uriScheme = mempty
+  , uriAuthority = Nothing
+  , uriQuery = fromMisoString (Miso.prettyQueryString misoUri)
+  , uriFragment = fromMisoString (Miso.uriFragment misoUri)
   }
 -----------------------------------------------------------------------------
