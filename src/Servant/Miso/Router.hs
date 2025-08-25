@@ -8,7 +8,7 @@
 {-# LANGUAGE PolyKinds             #-}
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Servant.Router
+-- Module      :  Servant.Miso.Router
 -- Copyright   :  (C) 2016-2025 David M. Johnson
 -- License     :  BSD3-style (see the file LICENSE)
 -- Maintainer  :  David M. Johnson <code@dmj.io>

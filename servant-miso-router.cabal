@@ -1,9 +1,9 @@
 cabal-version:      3.0
-name:               servant-router
+name:               servant-miso-router
 version:            0.1.0.0
 synopsis:           A router for servant
 description:        This is a client-side router that can be used with servant and miso
-homepage:           https://github.com/haskell-miso/servant-router
+homepage:           https://github.com/haskell-miso/servant-miso-router
 license:            BSD-3-Clause
 license-file:       LICENSE
 author:             dmjio
@@ -20,7 +20,7 @@ library
   import:
     warnings
   exposed-modules:
-    Servant.Router
+    Servant.Miso.Router
   build-depends:
     base < 5,
     bytestring,
