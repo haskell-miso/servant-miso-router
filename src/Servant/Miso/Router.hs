@@ -8,6 +8,8 @@
 {-# LANGUAGE PolyKinds           #-}
 {-# LANGUAGE GADTs               #-}
 -----------------------------------------------------------------------------
+{-# OPTIONS_GHC -Wno-orphans     #-}
+-----------------------------------------------------------------------------
 -- |
 -- Module      :  Servant.Miso.Router
 -- Copyright   :  (C) 2016-2025 David M. Johnson
@@ -232,4 +234,9 @@ uriToURI misoUri = URI
   , uriQuery = fromMisoString (Miso.prettyQueryString misoUri)
   , uriFragment = fromMisoString (Miso.uriFragment misoUri)
   }
+-----------------------------------------------------------------------------
+-- | For constructing type-safe links
+instance HasLink (View m a) where
+  type MkLink (View m a) b = b
+  toLink x _ = x
 -----------------------------------------------------------------------------
