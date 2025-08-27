@@ -2,9 +2,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE FlexibleInstances   #-}
+{-# LANGUAGE TypeApplications    #-}
 {-# LANGUAGE RecordWildCards     #-}
 {-# LANGUAGE TypeFamilies        #-}
 {-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE DataKinds           #-}
 {-# LANGUAGE PolyKinds           #-}
 {-# LANGUAGE GADTs               #-}
 -----------------------------------------------------------------------------
@@ -28,6 +30,8 @@ module Servant.Miso.Router
   , route
     -- ** Content Type re-export
   , HTML
+    -- ** Links
+  , toMisoURI
   ) where
 -----------------------------------------------------------------------------
 import qualified Data.ByteString.Char8 as BS
@@ -44,8 +48,9 @@ import           Web.HttpApiData
 import           Servant.Miso.Html (HTML)
 import           Miso.Types (View)
 import           Miso.Router ()
-import           Miso.String (fromMisoString)
+import           Miso.String (fromMisoString, ms)
 import qualified Miso.Router as Miso
+import           Servant.Links
 -----------------------------------------------------------------------------
 -- | Router terminator.
 -- The @HasRouter@ instance for @View@ finalizes the router.
@@ -239,4 +244,35 @@ uriToURI misoUri = URI
 instance HasLink (View m a) where
   type MkLink (View m a) b = b
   toLink x _ = x
+-----------------------------------------------------------------------------
+-- | Used for type-safe link generation with @allLinks'@
+--
+-- @
+-- type API = "home" :> QueryParam "foo" Int :> Get '[HTML] (View Model Action)
+--
+-- home :: Maybe Int -> URI
+-- home = allLinks (Proxy @API) toMisoURI
+--
+-- -- λ> home (Just 234)
+-- -- URI { uriPath = "home", uriFragment = "", uriQueryString = fromList [("foo", Just "234")] }
+-- --
+-- -- λ> Miso.prettyURI $ home (Just 234)
+-- -- -- "home?foo=234"
+-- @
+--
+toMisoURI :: Link -> Miso.URI
+toMisoURI = uriToURI' . linkURI
+  where
+    uriToURI' :: URI -> Miso.URI
+    uriToURI' uri@URI{..} = Miso.URI
+      { Miso.uriPath = ms uriPath
+      , Miso.uriFragment = ms uriFragment
+      , Miso.uriQueryString = parseQueryString
+      } where
+          parseQueryString =
+            case Miso.parseURI $ "/" <> ms (show newUri) of
+              Left _ -> mempty
+              Right misoUri -> Miso.uriQueryString misoUri
+            where
+              newUri = uri { uriAuthority = Nothing, uriScheme = mempty }
 -----------------------------------------------------------------------------
