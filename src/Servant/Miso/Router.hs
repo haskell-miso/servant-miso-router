@@ -140,8 +140,8 @@ instance (HasRouter sublayout, KnownSymbol path)
     (mkRouter (Proxy :: Proxy sublayout) a page)
 -----------------------------------------------------------------------------
 -- | View
-instance HasRouter (View m a) where
-  type RouteT (View m a) x = x
+instance HasRouter (View c p m a) where
+  type RouteT (View c p m a) x = x
   mkRouter _ _ a = RPage a
 -----------------------------------------------------------------------------
 -- | Verb
@@ -241,14 +241,14 @@ uriToURI misoUri = URI
   }
 -----------------------------------------------------------------------------
 -- | For constructing type-safe links
-instance HasLink (View m a) where
-  type MkLink (View m a) b = b
+instance HasLink (View c p m a) where
+  type MkLink (View c p m a) b = b
   toLink x _ = x
 -----------------------------------------------------------------------------
 -- | Used for type-safe link generation with @allLinks'@
 --
 -- @
--- type API = "home" :> QueryParam "foo" Int :> Get '[HTML] (View Model Action)
+-- type API = "home" :> QueryParam "foo" Int :> Get '[HTML] (View () () Model Action)
 --
 -- home :: Maybe Int -> URI
 -- home = allLinks (Proxy @API) toMisoURI
