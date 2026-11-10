@@ -237,8 +237,12 @@ uriToURI misoUri = URI
   , uriScheme = mempty
   , uriAuthority = Nothing
   , uriQuery = fromMisoString (Miso.prettyQueryString misoUri)
-  , uriFragment = fromMisoString (Miso.uriFragment misoUri)
-  }
+  , uriFragment = withHash (fromMisoString (Miso.uriFragment misoUri))
+  } where
+      -- miso 1.15 stores the fragment without its leading '#'; network-uri keeps it
+      withHash "" = ""
+      withHash f@('#' : _) = f
+      withHash f = '#' : f
 -----------------------------------------------------------------------------
 -- | For constructing type-safe links
 instance HasLink (View c p m a) where
@@ -266,7 +270,7 @@ toMisoURI = uriToURI' . linkURI
     uriToURI' :: URI -> Miso.URI
     uriToURI' uri@URI{..} = Miso.URI
       { Miso.uriPath = ms uriPath
-      , Miso.uriFragment = ms uriFragment
+      , Miso.uriFragment = ms (case uriFragment of { '#' : f -> f; f -> f })
       , Miso.uriQueryString = parseQueryString
       } where
           parseQueryString =
